@@ -1,0 +1,34 @@
+name: ASFDK C++ Governance Validation
+on:
+  push:
+    paths:
+      - '.github/workflows/validate-governance.yml'
+      - '.nltotoi/**'
+      - 'AGENTS.md'
+      - 'CLAUDE.md'
+      - 'NLT-DEV-OTOI.md'
+      - 'templates/**'
+      - 'SOPs/**'
+      - 'ISSUE_TEMPLATE/**'
+      - 'PULL_REQUEST_TEMPLATE/**'
+  pull_request:
+    paths:
+      - '.github/workflows/validate-governance.yml'
+      - '.nltotoi/**'
+      - 'AGENTS.md'
+      - 'CLAUDE.md'
+      - 'NLT-DEV-OTOI.md'
+      - 'templates/**'
+      - 'SOPs/**'
+      - 'ISSUE_TEMPLATE/**'
+      - 'PULL_REQUEST_TEMPLATE/**'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Check governance status
+        run: |
+          bash .nltotoi/scripts/validate-governance.sh

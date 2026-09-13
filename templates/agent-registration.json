@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Agent Registration Format",
+  "type": "object",
+  "properties": {
+    "agent_registration": {
+      "type": "object",
+      "properties": {
+        "agent_name": {"type": "string"},
+        "platform": {"type": "string"},
+        "version": {"type": "string"},
+        "session_id": {"type": "string"},
+        "entry_date": {"type": "string"},
+        "entry_point": {"type": "string"},
+        "acknowledged_otoi": {"type": "boolean"},
+        "otoi_version": {"type": "string"},
+        "working_repo": {"type": "string"},
+        "working_branch": {"type": "string"},
+        "capabilities_self_reported": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "known_limitations": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "preferred_handoff_format": {"type": "string"}
+      },
+      "required": [
+        "agent_name",
+        "platform",
+        "version",
+        "entry_date",
+        "entry_point",
+        "acknowledged_otoi",
+        "otoi_version",
+        "working_repo",
+        "working_branch"
+      ]
+    }
+  }
+}

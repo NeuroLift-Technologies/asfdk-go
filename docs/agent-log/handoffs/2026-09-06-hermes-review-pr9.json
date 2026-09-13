@@ -1,0 +1,49 @@
+{
+  "handoff_record": {
+    "session_id": "hermes-review-pr9-001",
+    "agent_name": "Hermes",
+    "date": "2026-09-06",
+    "repo": "NeuroLift-Technologies/asfdk-cplus",
+    "branch": "review/fix-toi-port-issues",
+    "work_completed": [
+      "Reviewed PR #9 - TOI-C++ Port (Phase 2)",
+      "Identified 12 technical issues across header, source, tests, and build files",
+      "Created fix branch with 3 commits resolving all compilation errors",
+      "Verified all 7 tests pass (25 assertions) with fixed code",
+      "Run governance validation: 22/22 checks passing"
+    ],
+    "work_in_progress": [],
+    "blockers": [],
+    "decisions_made": [
+      "std::expected replaced with tl::expected per DECISIONS.md (C++20 backport requirement)",
+      "Removed dead code: parseTOISafe inline function and canonicalize_impl declaration",
+      "Fixed test: tone comparison uses enum class instead of string literal",
+      "Fixed test: optional fields use -> operator, not .",
+      "Fixed test: REQUIRE_THROW corrected to REQUIRE_THROWS",
+      "Fixed test: TOIDocument aggregate init replaced with field-by-field assignment",
+      "Fixed test: invalid $toi version test now uses REQUIRE_THROWS_AS + safeParseTOI with VersionMismatch code",
+      "Added error code mapping in safeParseTOI to return specific TOIError::Code values"
+    ],
+    "decisions_pending": [],
+    "escalations": [],
+    "next_agent_notes": "Phase 2 TOI-C++ port now compiles and all 7 tests pass. The fix branch 'review/fix-toi-port-issues' is ready for merge. Phase 3 (OTOI) port is already in_progress per active-threads.md. Key governance decisions to monitor: (1) The canonicalize() and verifySignature() functions are stubbed - need JCS RFC 8785 and Ed25519 implementations before production use. (2) The resolveTOI() gap-filling logic is shallow (only fills 3 fields) - needs recursive object merging per SPEC \u00a79.",
+    "files_modified": [
+      "packages/toi/include/toi/TermsOfInteraction.h",
+      "packages/toi/src/TermsOfInteraction.cpp",
+      "packages/toi/src/TOIManager.cpp",
+      "packages/toi/CMakeLists.txt",
+      "packages/toi/tests/test_toi_manager.cpp",
+      "packages/toi/README.md"
+    ],
+    "tests_run": [
+      "TOI: parse minimal document",
+      "TOI: parse full document",
+      "TOI: validate minimal document",
+      "TOI: validate invalid $toi version",
+      "TOI: validate missing identity.author",
+      "TOI: tier precedence resolution",
+      "TOI: ethical_pillars parsing"
+    ],
+    "tests_passing": true
+  }
+}

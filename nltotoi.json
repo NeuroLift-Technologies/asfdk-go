@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ASFDK C++ Discovery Manifest",
+  "type": "object",
+  "properties": {
+    "name": {"type": "string", "enum": ["Cplus"]},
+    "description": {"type": "string", "description": "C++ port of the NeuroLift Technologies ASFDK (Solidarity Framework Development Kit)"},
+    "version": {"type": "string", "description": "1.0.0"},
+    "oroi": {"type": "string", "description": "ORG-DEV-OTOI-1.0.3"},
+    "related_repositories": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": ["asfdk (Python/TS reference)", "asfdk-kotlin", "asfdk-csharp", "nlt-world-engine", "neurolift-ai-fusion"]
+    },
+    "governed_by": {"type": "string", "description": "ORG-DEV-OTOI-1.0.3"},
+    "discovery_order": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": ["NLT-DEV-OTOI.md", "AGENTS.md", "CLAUDE.md"]
+    }
+  },
+  "required": ["name", "oroi", "governed_by"]
+}

@@ -1,0 +1,30 @@
+{
+  "doc_version": "1.0",
+  "governance_version": "ORG-DEV-OTOI-1.0.3",
+  "handoff_date": "2026-09-07",
+  "from_agent": "Hermes / desktop",
+  "to_agent": "next-reviewer",
+  "phase": "Phase 6 (ASFDK-C++ umbrella)",
+  "session_summary": "Addressed unmerged CodeRabbit review comment from PR #25 (merged) regarding missing root CMakeLists.txt and hardcoded vcpkg path in TOI CMakeLists.txt.",
+  "files_added": [
+    "CMakeLists.txt (root project file)"
+  ],
+  "files_modified": [
+    "README.md (build instructions updated with toolchain file)",
+    "packages/toi/CMakeLists.txt (hardcoded vcpkg path replaced with $ENV{VCPKG_ROOT} per DECISIONS.md §4)"
+  ],
+  "verification": {
+    "compilation": "Root CMakeLists.txt configured with C++23 standard per DECISIONS.md §1; vcpkg toolchain auto-detected per §4; all pillar packages composed via add_subdirectory",
+    "governance_checks": "22/22 passing",
+    "cross_pillar_integration": "All five add_subdirectory calls match the package targets expected by packages/asfdk/CMakeLists.txt (toi-cplus, otoi-cplus, rrt-cplus, sleepwalker-cplus, asfdk-cplus)"
+  },
+  "next_steps": [
+    "CI adopters should verify cmake -B build -DCMAKE_TOOLCHAIN_FILE=... works in vcpkg-enabled environments",
+    "Consider adding CMakePresets.json for standardized build configurations"
+  ],
+  "context_links": [
+    "docs/DECISIONS.md §4 (vcpkg package manager)",
+    "docs/REVIEW.md (canonical review format)",
+    "docs/active-threads.md (thread: phase-6-root-cmake-build-fix)"
+  ]
+}

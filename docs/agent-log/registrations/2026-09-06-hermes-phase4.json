@@ -1,0 +1,25 @@
+{
+  "agent_registration": {
+    "agent_name": "Hermes / desktop (Codex CLI)",
+    "platform": "Codex CLI",
+    "version": "g++ 15.2.0, C++20",
+    "session_id": "phase4-rrt-port",
+    "entry_date": "2026-09-06",
+    "entry_point": "User requested Phase 4 work on asfdk-cplus",
+    "acknowledged_otoi": true,
+    "otoi_version": "ORG-DEV-OTOI-1.0.3",
+    "working_repo": "NeuroLift-Technologies/asfdk-cplus",
+    "working_branch": "phase-1-reference-analysis",
+    "capabilities_self_reported": [
+      "C++20 development",
+      "Crisis detection engine porting",
+      "CMake build configuration",
+      "Catch2 test writing"
+    ],
+    "known_limitations": [
+      "No vcpkg/Catch2 installed locally — used standalone test harness",
+      "nlohmann/json downloaded as single header for local compilation"
+    ],
+    "preferred_handoff_format": "structured JSON"
+  }
+}

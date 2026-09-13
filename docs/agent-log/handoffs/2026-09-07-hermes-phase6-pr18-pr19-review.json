@@ -1,0 +1,11 @@
+{
+  "handoff_type": "review",
+  "date": "2026-09-07",
+  "agent": "Hermes / desktop",
+  "subject": "Review of PR #18 and PR #19 — Phase 6 ASFDK-C++ umbrella fixes",
+  "phase": "Phase 6",
+  "related_prs": [18, 19],
+  "branch_created": "phase-6-review-fixes",
+  "summary": "Reviewed two PR that applied OTOI m_active/m_mode fixes and a Sleepwalker CMakeLists.txt path change. Both PRs merged to main. PR #18 regressed Sleepwalker CMakeLists.txt from VCPKG_ROOT approach to hardcoded /home/joshd path, and its CodeRabbit review flagged: (1) m_active data race (plain mutable bool between safeHonor write and getStatus read), (2) m_mode never updated after safeHonor. Created branch phase-6-review-fixes with: m_active -> std::atomic<bool>, m_mode -> mutable + assigned resolvedEnforcement.mode in safeHonor, restored VCPKG_ROOT in Sleepwalker CMakeLists.txt.",
+  "next_action": "Create PR from phase-6-review-fixes against main."
+}

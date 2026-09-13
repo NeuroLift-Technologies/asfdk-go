@@ -1,0 +1,15 @@
+{
+  "handoff_type": "additional_review",
+  "date": "2026-09-07",
+  "agent": "Hermes / desktop",
+  "subject": "Additional review of PR #20 — Phase 6 CodeRabbit comment fixes",
+  "phase": "Phase 6",
+  "related_prs": [20],
+  "branch_created": "phase-6-hermes-review-fixes",
+  "summary": "PR #20 addresses CodeRabbit review comments from PR #18/#19 but introduces two new issues: (1) m_active declared as non-mutable std::atomic<bool> in a const-safeHonor() method — store() is non-const, causing compilation failure; (2) m_mode write occurs AFTER the release store on m_active, so the release/acquire pair does not establish happens-before for m_mode reads in getStatus() — data race. Fixes applied: mutable std::atomic<bool> m_active; reordered writes (m_mode before release-store); getStatus() now acquire-loads m_active.",
+  "files_modified": [
+    "packages/otoi/include/otoi/OTOIManager.h",
+    "packages/otoi/src/OTOIManager.cpp"
+  ],
+  "next_action": "Create PR from phase-6-hermes-review-fixes against phase-6-review-fixes (or main if PR #20 merges first)"
+}

@@ -1,0 +1,25 @@
+{
+  "agent_registration": {
+    "agent_name": "cplus_governance_agent",
+    "platform": "GitHub Copilot / Cursor",
+    "version": "2026.09.06",
+    "session_id": "session-cplus-001",
+    "entry_date": "2026-09-06",
+    "entry_point": "Porting ASFDK to C++",
+    "acknowledged_otoi": true,
+    "otoi_version": "ORG-DEV-OTOI-1.0.3",
+    "working_repo": "NeuroLift-Technologies/Cplus",
+    "working_branch": "main",
+    "capabilities_self_reported": [
+      "ASFDK framework porting and adaptation",
+      "TOI/OTOI governance compliance",
+      "C++ integration patterns",
+      "Unreal Engine bridge design"
+    ],
+    "known_limitations": [
+      "Full ASFDK feature parity in progress",
+      "Some Python/TypeScript-specific features require C++ equivalents"
+    ],
+    "preferred_handoff_format": "Structured JSON with context summary"
+  }
+}

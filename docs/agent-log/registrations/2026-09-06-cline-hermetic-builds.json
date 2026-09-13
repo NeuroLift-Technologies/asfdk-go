@@ -1,0 +1,26 @@
+{
+  "agent_registration": {
+    "agent_name": "Cline",
+    "platform": "Cline CLI",
+    "version": "latest",
+    "session_id": "hermetic-build-fixes-001",
+    "entry_date": "2026-09-06T18:20:00Z",
+    "entry_point": "docs/PLAN.md — package build verification follow-up (post Phase 3/4/5)",
+    "acknowledged_otoi": true,
+    "otoi_version": "ORG-DEV-OTOI-1.0.3",
+    "working_repo": "NeuroLift-Technologies/asfdk-cplus",
+    "working_branch": "fix/package-include-paths",
+    "capabilities_self_reported": [
+      "C++20 system programming",
+      "Direct g++ compilation and hermetic build verification",
+      "Standalone (Catch2-free) test runner authoring",
+      "Vendored header dependency management (nlohmann::json, spdlog shim)",
+      "NLT governance workflow compliance (commits, handoffs, registrations)"
+    ],
+    "known_limitations": [
+      "No system-wide vcpkg/CMake toolchain available — packages cannot be built via CMake on this machine",
+      "Catch2 unavailable locally — verification relies on the standalone test runners added in this PR"
+    ],
+    "preferred_handoff_format": "structured JSON with narrative summary of completed components and known gaps"
+  }
+}

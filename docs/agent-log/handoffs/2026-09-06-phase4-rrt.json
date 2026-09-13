@@ -1,0 +1,40 @@
+{
+  "handoff_record": {
+    "repo": "NeuroLift-Technologies/asfdk-cplus",
+    "branch": "phase-1-reference-analysis",
+    "work_completed": [
+      "Phase 4 — RRT Advocate-C++ port complete",
+      "Created packages/rrt-advocate/ with full 3-layer CDE pipeline",
+      "Ported KeywordLayer with 75+ regex patterns across 7 semantic fields",
+      "Ported SentimentLayer with heuristic polarity scorer and sliding window",
+      "Ported BehavioralLayer with complexity, latency, and Jaccard looping detection",
+      "Implemented CrisisDetector, CrisisAssessor, CrisisEngine, BurnoutDetector, RRTAdvocate",
+      "All crisis thresholds and layer weights preserved from Python reference",
+      "Self-harm always escalates to BLACK (safety-critical behavior preserved)",
+      "All sources compile with g++ 15.2.0, C++20",
+      "19 standalone tests pass (benign/distress/self-harm/engine/burnout)",
+      "Updated active-threads.md and governance file registry",
+      "Created README.md with architecture and security warnings"
+    ],
+    "work_in_progress": [],
+    "blockers": [],
+    "decisions_made": [
+      "Used heuristic sentiment fallback (no VADER in C++) — matches Python fallback behavior",
+      "Hashed word tokens for behavioral looping detection (privacy-preserving, matches Python SHA1 approach)",
+      "Layer weights hardcoded as static constexpr (0.45/0.35/0.20) — compile-time constants matching Python",
+      "Crisis thresholds use half-open intervals [low, high) matching Python reference"
+    ],
+    "decisions_pending": [],
+    "escalations": [],
+    "next_agent_notes": "Phase 4 complete. Next: Phase 6 (ASFDK-C++ Umbrella) which integrates all pillar packages. Phase 4 build target is 'rrt-cplus' static library. Headers at include/rrt/RRTAdvocate.h and include/rrt/RRTTypes.h. The nlohmann/json single header was downloaded to include/nlohmann/json.hpp for local compilation — in CI this should come from vcpkg.",
+    "files_modified": [
+      "packages/rrt-advocate/ (new, full package)",
+      "docs/active-threads.md (added phase-4 thread)",
+      ".nltotoi/index/governance-files.md (marked Phase 4 complete)",
+      "docs/agent-log/registrations/2026-09-06-hermes-phase4.json (new)",
+      "docs/agent-log/handoffs/2026-09-06-phase4-rrt.json (this file)"
+    ],
+    "tests_run": ["standalone_test: 19/19 passing"],
+    "tests_passing": true
+  }
+}

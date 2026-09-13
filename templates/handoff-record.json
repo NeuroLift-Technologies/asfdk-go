@@ -1,0 +1,76 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Handoff Record Format",
+  "type": "object",
+  "properties": {
+    "handoff_record": {
+      "type": "object",
+      "properties": {
+        "session_id": {"type": "string"},
+        "agent_name": {"type": "string"},
+        "date": {"type": "string"},
+        "repo": {"type": "string"},
+        "branch": {"type": "string"},
+        "work_completed": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "List of work items completed"
+        },
+        "work_in_progress": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "List of work items in progress"
+        },
+        "blockers": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "List of blockers"
+        },
+        "decisions_made": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "List of decisions made"
+        },
+        "decisions_pending": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "List of decisions pending"
+        },
+        "escalations": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "List of escalations"
+        },
+        "next_agent_notes": {"type": "string"},
+        "files_modified": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "List of files modified"
+        },
+        "tests_run": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "List of tests run"
+        },
+        "tests_passing": {"type": "boolean"}
+      },
+      "required": [
+        "session_id",
+        "agent_name",
+        "date",
+        "repo",
+        "branch",
+        "work_completed",
+        "work_in_progress",
+        "blockers",
+        "decisions_made",
+        "decisions_pending",
+        "escalations",
+        "next_agent_notes",
+        "files_modified",
+        "tests_run",
+        "tests_passing"
+      ]
+    }
+  }
+}

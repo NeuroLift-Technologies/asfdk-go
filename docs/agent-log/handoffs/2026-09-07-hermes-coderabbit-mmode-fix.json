@@ -1,0 +1,16 @@
+{
+  "handoff_type": "fix",
+  "date": "2026-09-07",
+  "agent": "Hermes / desktop",
+  "subject": "Fix CodeRabbit m_mode data race — Phase 6 atomic enforcement",
+  "phase": "Phase 6",
+  "related_prs": [20, 21],
+  "branch_created": "phase-6-hermes-atomic-mmode",
+  "summary": "CodeRabbit reviewed PR #20 and flagged that reordering m_mode write before the release store on m_active is insufficient — m_mode remains a non-atomic plain mutable EnforcementMode, so concurrent reads in getStatus() can still observe torn/stale values. PR #21 applied the reordering per the PR author's interpretation but did not make m_mode atomic. The CodeRabbit suggestion explicitly stated 'Reordering the existing assignments alone is insufficient.' Fix applied: both m_active and m_mode are now std::atomic<...>. safeHonor() does m_mode.store(relaxed) then m_active.store(release); getStatus() does m_active.load(acquire) then m_mode.load(relaxed). The release/acquire pair on m_active establishes happens-before for the m_mode read, satisfying the C++11 memory model and eliminating the data race.",
+  "files_modified": [
+    "packages/otoi/include/otoi/OTOIManager.h",
+    "packages/otoi/src/OTOIManager.cpp",
+    "docs/active-threads.md"
+  ],
+  "next_action": "Create PR from phase-6-hermes-atomic-mmode against phase-6-hermes-review-fixes (or main if PR #20 and PR #21 merge first)."
+}

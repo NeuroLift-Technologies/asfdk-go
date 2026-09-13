@@ -1,0 +1,45 @@
+{
+  "handoff_record": {
+    "session_id": "glibc23-strtoull-compat",
+    "agent_name": "kilo",
+    "date": "2026-09-08T05:03:47-04:00",
+    "otoi_version": "ORG-DEV-OTOI-1.0.3",
+    "repo": "NeuroLift-Technologies/asfdk-cplus",
+    "branch": "fix/glibc23-strtoull-compat",
+    "work_completed": [
+      "Diagnosed linker errors for __isoc23_strtoull and __isoc23_strtoll when building NLTGovernanceSubsystem against the UE toolchain's glibc 2.28, caused by system <stdlib.h> redirecting strtoull/strtoll to C23 aliases unavailable in the older runtime",
+      "Added packages/asfdk/src/GLIBC23Compat.cpp with compatibility wrappers for __isoc23_strtoull, __isoc23_strtoll, and their _l locale variants, delegating to std::strtoull and std::strtoll",
+      "Replaced std::expected with tl::expected in packages/otoi/src/OTOIManager.cpp to match project convention",
+      "Added #undef strtoull/strtoll/strtol/strtoul around cstdlib includes in packages/include/nlohmann/json.hpp to avoid C23 symbol redirection",
+      "Removed unused m_toi member from packages/asfdk/include/asfdk/ASFDK.h and packages/asfdk/src/ASFDK.cpp",
+      "Created .gitignore to exclude build artifacts (*.o, lib/, etc.)",
+      "Committed all changes with NLT commit format: [kilo] fix(glibc23-compat): resolve __isoc23_strtoull/strtoll linker errors on glibc < 2.38",
+      "Created and pushed branch fix/glibc23-strtoull-compat to origin",
+      "Opened PR #35: https://github.com/NeuroLift-Technologies/asfdk-cplus/pull/35",
+      "Verified WorldEngine builds with the NLT Plugin with no problems by rebuilding WorldEngineEditor Linux Development via UBT — build succeeded"
+    ],
+    "work_in_progress": [],
+    "blockers": [],
+    "decisions_made": [
+      "Used GLIBC23Compat.cpp wrapper approach instead of attempting to disable C23 feature macros via compiler flags, because UE toolchain predates glibc 2.38 and the missing symbols are referenced transitively through nlohmann/json.hpp",
+      "Kept json.hpp #undef edits as a secondary safeguard even though the primary fix is the compatibility object file"
+    ],
+    "decisions_pending": [],
+    "escalations": [],
+    "next_agent_notes": "PR #35 is open for review. The fix is verified against the UE Linux toolchain (glibc 2.28) via a successful WorldEngineEditor build. If additional platforms are targeted (Windows/Mac), the GLIBC23Compat.cpp approach is Linux-specific and equivalent fixes may be needed for MSVC/Clang on those platforms.",
+    "files_modified": [
+      "packages/asfdk/src/GLIBC23Compat.cpp",
+      "packages/otoi/src/OTOIManager.cpp",
+      "packages/include/nlohmann/json.hpp",
+      "packages/asfdk/include/asfdk/ASFDK.h",
+      "packages/asfdk/src/ASFDK.cpp",
+      ".gitignore"
+    ],
+    "tests_run": [
+      "Rebuilt asfdk-cplus static library (libasfdk.a) with all object files including GLIBC23Compat.o",
+      "Rebuilt WorldEngineEditor Linux Development via UBT with NLTGovernanceSubsystem plugin linking against libasfdk.a — build succeeded with no linker errors"
+    ],
+    "tests_passing": true,
+    "pr_url": "https://github.com/NeuroLift-Technologies/asfdk-cplus/pull/35"
+  }
+}

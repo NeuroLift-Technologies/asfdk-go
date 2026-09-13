@@ -1,0 +1,11 @@
+{
+  "name": "asfdk-cplus",
+  "version": "1.0.3",
+  "description": "ASFDK Solidarity Framework port to C/C++ — governance framework for NLT AI systems",
+  "dependencies": [
+    "nlohmann-json",
+    "catch2",
+    "spdlog",
+    "tl-expected"
+  ]
+}
