@@ -44,7 +44,7 @@ This file registry tracks all governance-related files in the `asfdk-go` reposit
 | Foundation orchestration (mode/component resolution) | `foundation.go` | ✅ Complete |
 | Sleepwalker emotional-state analysis | `sleepwalker.go` | ✅ Complete |
 | RRT crisis assessment & response | `rrt.go` | ✅ Complete |
-| Test suite (18 tests) | `foundation_test.go` | ✅ Complete |
+| Test suite (29 tests) | `foundation_test.go` | ✅ Complete |
 
 **Legend:** ✅ = Present and validated, ⬜ = Planned, ❌ = Missing
 
@@ -54,6 +54,8 @@ This file registry tracks all governance-related files in the `asfdk-go` reposit
 
 | Agent | Session | Date | Status |
 |---|---|---|---|
-| go_governance_agent (Cline) | session-asfdk-go-001 | 2026-09-12 | ✅ Active |
+| go_governance_agent (Cline) | session-asfdk-go-001 (Go port) | 2026-09-12 | ✅ Complete |
+| go_governance_agent (Cline) | session-asfdk-go-002 (review round 1) | 2026-09-12 | ✅ Complete |
+| go_governance_agent (Cline) | session-asfdk-go-003 (Bugbot/canonical round 2) | 2026-09-12 | ✅ Complete |
 
-*Last updated: 2026-09-12*
+*Last updated: 2026-09-13*

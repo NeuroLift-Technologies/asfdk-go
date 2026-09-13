@@ -74,6 +74,30 @@ check "CLAUDE.md references commit format" grep -q "type(scope): description" "$
 # 12. Check NLT-DEV-OTOI.md version reference
 check "NLT-DEV-OTOI.md references 1.0.3" grep -q "1.0.3" "$REPO_ROOT/NLT-DEV-OTOI.md"
 
+# go_gate runs a Go command from the repo root.
+go_gate() { cd "$REPO_ROOT" && "$@"; }
+
+# 13. Go module and source integrity — governance coverage extends to every
+# port component, not just foundation.go.
+check "go.mod defines asfdk-go module" grep -q "module github.com/NeuroLift-Technologies/asfdk-go" "$REPO_ROOT/go.mod"
+for f in types.go dto.go foundation.go promptdefense.go sleepwalker.go rrt.go foundation_test.go; do
+    check "Go source present: $f" test -f "$REPO_ROOT/$f"
+done
+for f in types.go dto.go foundation.go promptdefense.go sleepwalker.go rrt.go foundation_test.go; do
+    check "package asfdk declared: $f" grep -q '^package asfdk$' "$REPO_ROOT/$f"
+done
+
+# 14. Go toolchain gates — exercised when Go is available (CI always has it;
+# environments without the toolchain skip these rather than failing).
+if command -v go >/dev/null 2>&1; then
+    check "gofmt reports no unformatted files" go_gate bash -c 'test -z "$(gofmt -l .)"'
+    check "go vet passes" go_gate go vet ./...
+    check "go build passes" go_gate go build ./...
+    check "go test passes" go_gate go test ./... -count=1
+else
+    echo "  ⚠️ SKIP: Go toolchain not on PATH — gofmt/vet/build/test gates deferred to CI"
+fi
+
 echo ""
 echo "=== Results ==="
 echo "Passed: $PASS"
