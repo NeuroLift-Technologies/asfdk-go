@@ -1,5 +1,5 @@
 #!/bin/bash
-# validate-governance.sh — ASFDK C++ Governance Validation
+# validate-governance.sh — ASFDK Go Governance Validation
 # Run: bash .nltotoi/scripts/validate-governance.sh
 # Returns: 0 if all checks pass, 1 if any fail
 
@@ -7,7 +7,7 @@ set -euo pipefail
 
 OTOI_VERSION="ORG-DEV-OTOI-1.0.3"
 # Script lives at .nltotoi/scripts/validate-governance.sh,
-# so repo root is two levels up: Cplus repo root
+# so repo root is two levels up: asfdk-go repo root
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 PASS=0
 FAIL=0
@@ -24,7 +24,7 @@ check() {
     fi
 }
 
-echo "=== ASFDK C++ Governance Validation ==="
+echo "=== ASFDK Go Governance Validation ==="
 echo "Document ID: $OTOI_VERSION"
 echo ""
 

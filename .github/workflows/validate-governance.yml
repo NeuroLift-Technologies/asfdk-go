@@ -1,4 +1,4 @@
-name: ASFDK C++ Governance Validation
+name: ASFDK Go Governance Validation
 on:
   push:
     paths:

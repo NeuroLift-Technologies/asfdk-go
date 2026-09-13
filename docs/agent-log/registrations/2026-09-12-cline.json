@@ -1,7 +1,7 @@
 {
   "agent_registration": {
     "agent_name": "go_governance_agent",
-    "platform": "GitHub Copilot / Cursor",
+    "platform": "Cline (Claude)",
     "version": "2026.09.12",
     "session_id": "session-asfdk-go-001",
     "entry_date": "2026-09-12",

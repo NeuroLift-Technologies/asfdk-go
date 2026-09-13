@@ -1,12 +1,8 @@
 # Build artifacts
-*.o
-*.a
-*.so
-*.dylib
-*.dll
-lib/
-build/
-cmake-build-*/
+*.exe
+*.test
+*.out
+vendor/
 
 # IDE
 .vscode/

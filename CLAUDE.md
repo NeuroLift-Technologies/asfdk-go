@@ -1,4 +1,4 @@
-# CLAUDE.md — Cplus
+# CLAUDE.md — asfdk-go
 
 ## You Are Here
 
@@ -14,8 +14,7 @@ You are a coding agent operating within the **NeuroLift Technologies** organizat
 > - NLT-DEV-OTOI.md → https://github.com/NeuroLift-Technologies/.github/blob/main/governance/NLT-DEV-OTOI.md
 > - AGENTS.md → https://github.com/NeuroLift-Technologies/.github/blob/main/governance/AGENTS.md
 >
-> Ask your org admin to grant the GitHub App access to `.github-private`. See
-> `docs/troubleshooting/github-app-access.md` in this repo for instructions.
+> Ask your org admin to grant the GitHub App access to `.github-private`.
 
 **Final authority:** Joshua W. Dorsey, Sr. Escalate. Do not guess.
 
@@ -84,20 +83,25 @@ These are **non-negotiable**. No exceptions without explicit Joshua approval:
 
 ## Internal File Map
 
-All files below live in this repository (`NeuroLift-Technologies/Cplus`):
+All files below live in this repository (`NeuroLift-Technologies/asfdk-go`):
 
 ```
 AGENTS.md                               ← Agent registry (this file)
 CLAUDE.md                               ← This file — project-specific context
 NLT-DEV-OTOI.md                         ← Canonical org-level agent contract (mirror)
 nltotoi.json                            ← Discovery manifest (.nltotoi/)
+go.mod / types.go / dto.go              ← Go module and shared types
+foundation.go / promptdefense.go        ← Foundation orchestration, TOI/OTOI, sanitization
+sleepwalker.go / rrt.go                 ← Emotional-state analysis, crisis assessment
+foundation_test.go                      ← Go test suite (go test ./...)
 
 .nltotoi/
 ├── README.md                           ← Namespace overview
 ├── index/governance-files.md          ← File registry
-├── contracts/README.md                ← Contract namespace
-├── proposals/validation-roadmap.md    ← Validation roadmap
-└── scripts/validate-governance.sh     ← Governance validation
+├── scripts/validate-governance.sh     ← Governance validation
+
+.github/workflows/
+└── validate-governance.yml            ← CI: runs validate-governance.sh
 
 templates/
 ├── agent-registration.json            ← OTOI Section 3 registration format
@@ -111,9 +115,6 @@ ISSUE_TEMPLATE/
 
 PULL_REQUEST_TEMPLATE/
 └── agent-contribution.md              ← Agent PR checklist
-
-workflows/
-└── validate-governance.yml            ← CI: runs validate-governance.sh
 
 SOPs/
 ├── new-agent-onboarding.md            ← How to onboard a new coding agent
