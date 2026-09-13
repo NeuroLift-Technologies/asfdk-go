@@ -1,7 +1,6 @@
 package asfdk
 
 import (
-	"fmt"
 	"sort"
 	"strings"
 	"time"
@@ -39,6 +38,17 @@ var crisisWeights = map[string]float64{
 	"substance_concern": 0.1, "acute_agitation": 0.08,
 }
 
+// crisisPatternNames returns the indicator names in sorted order so crisis
+// scoring is deterministic regardless of Go map iteration order.
+func crisisPatternNames() []string {
+	names := make([]string, 0, len(crisisPatterns))
+	for name := range crisisPatterns {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	return names
+}
+
 // CrisisAdvisor performs crisis detection and response planning (RRT).
 type CrisisAdvisor struct{}
 
@@ -50,12 +60,7 @@ func scoreCrisis(text string) (float64, []string, []string) {
 	lower := strings.ToLower(text)
 	var primary, secondary []string
 	score := 0.0
-	names := make([]string, 0, len(crisisPatterns))
-	for name := range crisisPatterns {
-		names = append(names, name)
-	}
-	sort.Strings(names)
-	for _, name := range names {
+	for _, name := range crisisPatternNames() {
 		for _, kw := range crisisPatterns[name] {
 			if strings.Contains(lower, kw) {
 				score += crisisWeights[name]
@@ -69,7 +74,7 @@ func scoreCrisis(text string) (float64, []string, []string) {
 
 // AssessCrisis performs crisis assessment on interaction data.
 func AssessCrisis(data map[string]any) CrisisAssessment {
-	text := fmt.Sprint(data["text"])
+	text := textFromData(data)
 	score, primary, _ := scoreCrisis(text)
 	level := CrisisGreen
 	switch {

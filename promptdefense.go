@@ -1,9 +1,11 @@
 package asfdk
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/url"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -166,7 +168,7 @@ func SanitizeInput(input string, maxLength int) SanitizationResult {
 func ValidateOutput(output string, schemaType OutputSchemaType) ValidationResult {
 	if schemaType == OutputSchemaJSON {
 		var v any
-		if err := jsonUnmarshal([]byte(output), &v); err != nil {
+		if err := json.Unmarshal([]byte(output), &v); err != nil {
 			return ValidationResult{Valid: false, Reason: "output is not valid JSON"}
 		}
 		return ValidationResult{Valid: true}
@@ -194,7 +196,7 @@ func StoreSecurityEvent(path string, event SecurityEvent) error {
 		return err
 	}
 	defer f.Close()
-	line, err := jsonMarshal(event)
+	line, err := json.Marshal(event)
 	if err != nil {
 		return err
 	}
@@ -202,10 +204,11 @@ func StoreSecurityEvent(path string, event SecurityEvent) error {
 	return err
 }
 
-// dirOf returns the directory portion of a path.
+// dirOf returns the directory portion of a path, platform-aware (handles
+// both "/" and Windows "\" separators). Kept for backward compatibility;
+// callers should prefer filepath.Dir directly.
+//
+// Deprecated: use filepath.Dir.
 func dirOf(path string) string {
-	if i := strings.LastIndex(path, "/"); i > 0 {
-		return path[:i]
-	}
-	return "."
+	return filepath.Dir(path)
 }

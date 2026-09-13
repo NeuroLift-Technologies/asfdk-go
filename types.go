@@ -69,13 +69,15 @@ func ParseChannel(s string) Channel {
 	return ChannelUnknown
 }
 
-// ChannelNormalize coerces an arbitrary value into a Channel: strings are
-// parsed by canonical name, Channel values pass through, and anything else
-// (including nil) resolves to ChannelUnknown.
+// ChannelNormalize coerces an arbitrary value into a Channel: strings and
+// Channel values pass through only if they are canonical channel names;
+// anything else (including nil or unrecognized values) resolves to
+// ChannelUnknown. Normalization is idempotent and never preserves a
+// non-canonical value.
 func ChannelNormalize(value any) Channel {
 	switch v := value.(type) {
 	case Channel:
-		return v
+		return ParseChannel(string(v))
 	case string:
 		return ParseChannel(v)
 	default:

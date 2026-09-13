@@ -33,11 +33,15 @@ type UserInteraction struct {
 }
 
 // FoundationResponse is the unified output of ProcessInteraction.
+// ComponentsInvolved lists the components that processed the interaction.
+// Trusted is the aggregate provenance verdict: false if any involved
+// component flagged the input as coming from an untrusted channel.
 type FoundationResponse struct {
 	Timestamp          time.Time      `json:"timestamp"`
 	ResponseType       string         `json:"response_type"`
 	Content            map[string]any `json:"content"`
 	ComponentsInvolved []string       `json:"components_involved"`
+	Trusted            bool           `json:"trusted"`
 	Success            bool           `json:"success"`
 }
 

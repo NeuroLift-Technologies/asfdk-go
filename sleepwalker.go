@@ -1,6 +1,7 @@
 package asfdk
 
 import (
+	"fmt"
 	"regexp"
 	"sort"
 	"strings"
@@ -112,6 +113,18 @@ func indexOf(list []string, s string) int {
 		}
 	}
 	return -1
+}
+
+// textFromData extracts the text payload from interaction data, returning an
+// empty string for a missing key or nil value (rather than the "<nil>"
+// placeholder fmt.Sprint would produce, which would feed garbage to the
+// analyzers).
+func textFromData(data map[string]any) string {
+	v, ok := data["text"]
+	if !ok || v == nil {
+		return ""
+	}
+	return fmt.Sprint(v)
 }
 
 // SleepwalkerProtocol performs emotional-state analysis (Sleepwalker).

@@ -8,17 +8,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"sort"
 	"strings"
 	"time"
 )
 
-// jsonUnmarshal and jsonMarshal are thin indirections kept as functions so
-// structured encoding behavior is hooked in one place.
-func jsonUnmarshal(data []byte, v any) error { return json.Unmarshal(data, v) }
-func jsonMarshal(v any) ([]byte, error)      { return json.Marshal(v) }
-
 func BoolPtr(b bool) *bool { return &b }
+
+// activeComponentNames is the canonical alphabetical order of the framework
+// components, used consistently by HealthCheck and StatusSummary.
+var activeComponentNames = []string{"rrt_advocate", "sleepwalker_protocol", "toi_otoi_framework"}
 
 // defaultComponents returns the mode default component set.
 func defaultComponents(mode FoundationMode) FoundationComponents {
@@ -84,28 +82,47 @@ type NeuroLiftFoundation struct {
 	initialized bool
 }
 
-// NewNeuroLiftFoundation creates a foundation from config.
-func NewNeuroLiftFoundation(config FoundationConfig) *NeuroLiftFoundation {
+// NewNeuroLiftFoundation creates a foundation from config. If config.Toi is a
+// file path, it is loaded from disk: a missing, unreadable, or malformed file
+// returns an error rather than silently falling back to the default TOI. An
+// explicitly configured TOI must never be quietly replaced. Unsupported Toi
+// value types also produce an error.
+func NewNeuroLiftFoundation(config FoundationConfig) (*NeuroLiftFoundation, error) {
 	mode := ResolveMode(config)
 	userId := config.UserId
 	if userId == "" {
 		userId = "anonymous"
 	}
-	f := &NeuroLiftFoundation{userId: userId, mode: mode, components: ComponentsForMode(mode, config), toi: defaultTOI()}
+	f := &NeuroLiftFoundation{userId: userId, mode: mode, components: ComponentsForMode(mode, config)}
 	switch t := config.Toi.(type) {
 	case nil:
+		f.init(nil)
 	case string:
-		if data, err := os.ReadFile(t); err == nil {
-			var doc map[string]any
-			if json.Unmarshal(data, &doc) == nil && doc != nil {
-				f.toi = sanitizeTOIDocument(doc)
-			}
+		data, err := os.ReadFile(t)
+		if err != nil {
+			return nil, fmt.Errorf("load TOI file: %w", err)
 		}
+		var doc map[string]any
+		if err := json.Unmarshal(data, &doc); err != nil {
+			return nil, fmt.Errorf("parse TOI file: %w", err)
+		}
+		f.init(sanitizeTOIDocument(doc))
 	case map[string]any:
-		f.toi = sanitizeTOIDocument(t)
+		f.init(sanitizeTOIDocument(t))
+	default:
+		return nil, fmt.Errorf("unsupported TOI value type %T", config.Toi)
 	}
+	return f, nil
+}
+
+// init sets the TOI document (nil selects the default TOI) and marks the
+// foundation initialized.
+func (f *NeuroLiftFoundation) init(toi map[string]any) {
+	if toi == nil {
+		toi = defaultTOI()
+	}
+	f.toi = toi
 	f.initialized = f.toi != nil
-	return f
 }
 
 // IsComponentActive reports whether a named component is enabled.
@@ -131,7 +148,7 @@ func (f *NeuroLiftFoundation) ValidateTOIDocument() TOIValidationResult {
 func (f *NeuroLiftFoundation) HealthCheck() HealthCheckResult {
 	components := map[string]ComponentStatus{}
 	healthy := true
-	for _, name := range []string{"toi_otoi_framework", "sleepwalker_protocol", "rrt_advocate"} {
+	for _, name := range activeComponentNames {
 		active := f.IsComponentActive(name)
 		status := ComponentStatus{Active: active, Mode: modeName(f.mode)}
 		if active && !f.initialized {
@@ -144,18 +161,27 @@ func (f *NeuroLiftFoundation) HealthCheck() HealthCheckResult {
 }
 
 // ProcessInteraction routes an interaction through the active components and
-// returns the unified response.
+// returns the unified response. Interactions with unknown or missing channel
+// provenance are rejected: they are never analyzed as if they were trusted
+// user input.
 func (f *NeuroLiftFoundation) ProcessInteraction(interaction UserInteraction) (FoundationResponse, error) {
 	response := FoundationResponse{
 		Timestamp:          time.Now(),
 		ResponseType:       "foundation_response",
 		Content:            map[string]any{},
 		ComponentsInvolved: []string{},
+		Trusted:            true,
 		Success:            true,
 	}
 	channel := ChannelNormalize(interaction.Channel)
 	if channel == ChannelUnknown {
-		channel = ChannelUserInput
+		// Security: never upgrade unknown or missing provenance to
+		// user_input — that would silently grant user-input trust to
+		// inputs whose origin cannot be verified. Fail closed instead.
+		response.Success = false
+		response.Trusted = false
+		response.Content["error"] = "unknown channel provenance"
+		return response, fmt.Errorf("unknown channel provenance: %q", interaction.Channel)
 	}
 
 	if f.IsComponentActive("toi_otoi_framework") {
@@ -165,7 +191,8 @@ func (f *NeuroLiftFoundation) ProcessInteraction(interaction UserInteraction) (F
 	}
 	if f.IsComponentActive("sleepwalker_protocol") {
 		response.ComponentsInvolved = append(response.ComponentsInvolved, "sleepwalker_protocol")
-		state := AnalyzeEmotionalStateWithProvenance(fmt.Sprint(interaction.Data["text"]), channel)
+		state := AnalyzeEmotionalStateWithProvenance(textFromData(interaction.Data), channel)
+		response.Trusted = response.Trusted && state.Trusted
 		response.Content["sleepwalker"] = map[string]any{
 			"state": state.State, "confidence": state.Confidence,
 			"channel": string(channel), "trusted": state.Trusted,
@@ -174,6 +201,7 @@ func (f *NeuroLiftFoundation) ProcessInteraction(interaction UserInteraction) (F
 	if f.IsComponentActive("rrt_advocate") {
 		response.ComponentsInvolved = append(response.ComponentsInvolved, "rrt_advocate")
 		assessment := AssessCrisisWithProvenance(interaction.Data, channel)
+		response.Trusted = response.Trusted && assessment.Trusted
 		response.Content["rrt"] = map[string]any{
 			"crisis_level": assessment.CrisisLevel.String(), "confidence": assessment.ConfidenceScore,
 			"channel": string(channel), "trusted": assessment.Trusted,
@@ -190,11 +218,10 @@ func (f *NeuroLiftFoundation) ProcessInteraction(interaction UserInteraction) (F
 // StatusSummary returns a human-readable one-line status.
 func (f *NeuroLiftFoundation) StatusSummary() string {
 	var names []string
-	for _, name := range []string{"rrt_advocate", "sleepwalker_protocol", "toi_otoi_framework"} {
+	for _, name := range activeComponentNames {
 		if f.IsComponentActive(name) {
 			names = append(names, name)
 		}
 	}
-	sort.Strings(names)
 	return fmt.Sprintf("user=%s mode=%s active=[%s]", f.userId, modeName(f.mode), strings.Join(names, ","))
 }

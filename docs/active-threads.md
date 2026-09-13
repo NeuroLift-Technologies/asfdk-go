@@ -20,9 +20,9 @@
 | **Task** | Clean-room port of ASFDK to Go 1.25 (standard library only); remove the C++ template content inherited from the initial import. |
 | **Scope** | `*.go`, `go.mod`, `README.md`, `docs/*`, `AGENTS.md`, `CLAUDE.md`, `nltotoi.json`, `.nltotoi/*`, `.github/workflows/*`, `.gitignore` |
 | **Blockers** | None. |
-| **Related PR** | _pending — to be created_ |
-| **Notes** | The initial commit was a byte-for-byte copy of the `asfdk-cplus` tree (verified by empty diff); that content is preserved on branch `archive/cpp-initial-import` and in NeuroLift-Technologies/asfdk-cplus. C++ artifacts (packages/, CMake, vcpkg, C++ docs, architecture PNG, C++ agent-log history) removed; governance identity rewritten for Go. Behavior mirrors the canonical Python/TS reference (NeuroLift-Technologies/asfdk) and the C# port, including FoundationComponents override semantics ported correctly from day one (lesson from asfdk-csharp THREAD-001). |
-| **Handoff record** | `docs/agent-log/handoffs/2026-09-12-cline.json` |
+| **Related PR** | #1 |
+| **Notes** | The initial commit was a byte-for-byte copy of the `asfdk-cplus` tree (verified by empty diff); that content is preserved on branch `archive/cpp-initial-import` and in NeuroLift-Technologies/asfdk-cplus. C++ artifacts (packages/, CMake, vcpkg, C++ docs, architecture PNG, C++ agent-log history) removed; governance identity rewritten for Go. Behavior mirrors the canonical Python/TS reference (NeuroLift-Technologies/asfdk) and the C# port, including FoundationComponents override semantics ported correctly from day one (lesson from asfdk-csharp THREAD-001). PR #1 review round addressed (session-asfdk-go-002): Codex P1 (unknown-channel provenance fails closed; `ChannelNormalize` canonicalizes), Codex P2 (TOI file failures surface errors; constructor returns `(*NeuroLiftFoundation, error)`), Codex P2 (`filepath.Dir`), plus all Low findings. 22/22 tests; governance 22/22. |
+| **Handoff record** | `docs/agent-log/handoffs/2026-09-12-cline.json` (port), `docs/agent-log/handoffs/2026-09-12-cline-pr1-review.json` (PR review round) |
 
 ---
 
