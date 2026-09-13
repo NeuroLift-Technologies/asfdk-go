@@ -61,7 +61,7 @@ func analyzeIndicators(text string) ([]string, map[string]float64) {
 func AnalyzeEmotionalState(text string) EmotionalState {
 	matched, scores := analyzeIndicators(text)
 	state := "neutral"
-	confidence := 0.5
+	confidence := 0.0
 
 	if crisisIdx := indexOf(matched, "crisis_speak"); crisisIdx >= 0 {
 		state = "crisis"
@@ -80,6 +80,39 @@ func AnalyzeEmotionalState(text string) EmotionalState {
 	}
 
 	return EmotionalState{State: state, Confidence: clamp01(confidence), Indicators: matched, RawScores: scores}
+}
+
+// sanitizeForAssessment sanitizes text before assessment, mirroring the
+// canonical fail-open policy: a flagged input is still assessed defensively
+// (so a genuine crisis signal is never silently suppressed by an injection
+// heuristic) but the flag and a security event are recorded.
+func sanitizeForAssessment(text string) SanitizationResult {
+	res := SanitizeInput(text, MaxInputLength)
+	if res.Clean {
+		return res
+	}
+	eventType := SecurityValidationFailure
+	switch res.RiskLevel {
+	case RiskLevelHigh:
+		eventType = SecurityInjectionAttempt
+	case RiskLevelMedium:
+		eventType = SecurityLengthExceeded
+	}
+	_ = StoreSecurityEvent(defaultSecurityLogPath, NewSecurityEvent(eventType, "unknown", res.Reason))
+	return res
+}
+
+// AssessEmotionalStateWithProvenance is the full canonical Sleepwalker flow:
+// sanitize first (flag, don't block), analyze the sanitized content, then
+// attach channel provenance. Trust is true only for direct user input.
+func AssessEmotionalStateWithProvenance(text string, channel Channel) EmotionalStateWithProvenance {
+	sanitized := sanitizeForAssessment(text)
+	res := AnalyzeEmotionalStateWithProvenance(sanitized.Content, channel)
+	if !sanitized.Clean {
+		res.Flagged = true
+		res.FlagReason = sanitized.Reason
+	}
+	return res
 }
 
 // AnalyzeEmotionalStateWithProvenance adds channel-aware trust analysis.
@@ -143,8 +176,23 @@ func (s *SleepwalkerProtocol) AnalyzeWithProvenance(text string, channel Channel
 	return AnalyzeEmotionalStateWithProvenance(text, channel)
 }
 
-// channelTrusted reports whether a channel is trusted for emotional input.
-// Only direct user input and system events are trusted.
+// channelTrusted reports whether a channel is trusted for analysis input.
+// Only direct user input is trusted, matching the canonical reference
+// (trusted = resolved == Channel.USER_INPUT); system-originated content is
+// provenance-tracked but not treated as user input.
 func channelTrusted(channel Channel) bool {
-	return channel == ChannelUserInput || channel == ChannelSystem
+	return channel == ChannelUserInput
+}
+
+// RequiresRrtaHandoff reports whether an assessed emotional state warrants an
+// RRT Advocate handoff, mirroring the canonical predicate
+// (depressed/anxious/angry/distressed hand off immediately, as does any
+// crisis classification): the Go port uses the category names produced by
+// AnalyzeEmotionalState.
+func RequiresRrtaHandoff(state EmotionalState) bool {
+	switch state.State {
+	case "distress", "anxiety", "sadness", "anger", "crisis":
+		return true
+	}
+	return false
 }

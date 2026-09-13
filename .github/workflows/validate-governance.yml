@@ -1,27 +1,9 @@
 name: ASFDK Go Governance Validation
 on:
   push:
-    paths:
-      - '.github/workflows/validate-governance.yml'
-      - '.nltotoi/**'
-      - 'AGENTS.md'
-      - 'CLAUDE.md'
-      - 'NLT-DEV-OTOI.md'
-      - 'templates/**'
-      - 'SOPs/**'
-      - 'ISSUE_TEMPLATE/**'
-      - 'PULL_REQUEST_TEMPLATE/**'
+    branches: [main]
   pull_request:
-    paths:
-      - '.github/workflows/validate-governance.yml'
-      - '.nltotoi/**'
-      - 'AGENTS.md'
-      - 'CLAUDE.md'
-      - 'NLT-DEV-OTOI.md'
-      - 'templates/**'
-      - 'SOPs/**'
-      - 'ISSUE_TEMPLATE/**'
-      - 'PULL_REQUEST_TEMPLATE/**'
+    branches: [main]
 
 jobs:
   validate:
@@ -29,6 +11,19 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
       - name: Check governance status
         run: |
           bash .nltotoi/scripts/validate-governance.sh
+      - name: gofmt check
+        run: |
+          test -z "$(gofmt -l .)" || { echo 'gofmt violations:'; gofmt -l .; exit 1; }
+      - name: go vet
+        run: go vet ./...
+      - name: go build
+        run: go build ./...
+      - name: go test
+        run: go test ./... -count=1 -v

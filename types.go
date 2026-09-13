@@ -127,16 +127,24 @@ const (
 	CrisisBlack
 )
 
-var crisisNames = map[CrisisLevel]string{
-	CrisisGreen:  "green",
-	CrisisYellow: "yellow",
-	CrisisOrange: "orange",
-	CrisisRed:    "red",
-	CrisisBlack:  "black",
+var crisisLevelOrder = []struct {
+	level CrisisLevel
+	name  string
+}{
+	{CrisisGreen, "green"}, {CrisisYellow, "yellow"}, {CrisisOrange, "orange"},
+	{CrisisRed, "red"}, {CrisisBlack, "black"},
 }
 
-// String returns the canonical lowercase JSON name of the level.
-func (c CrisisLevel) String() string { return crisisNames[c] }
+// String returns the canonical lowercase JSON name of the level, or "" for an
+// out-of-range value.
+func (c CrisisLevel) String() string {
+	for _, entry := range crisisLevelOrder {
+		if entry.level == c {
+			return entry.name
+		}
+	}
+	return ""
+}
 
 // MarshalJSON encodes the level as its canonical string name.
 func (c CrisisLevel) MarshalJSON() ([]byte, error) {
@@ -144,11 +152,13 @@ func (c CrisisLevel) MarshalJSON() ([]byte, error) {
 }
 
 // ParseCrisisLevel maps a canonical name back to a CrisisLevel. Unknown input
-// resolves to CrisisGreen.
+// resolves to CrisisGreen. Iterates the pinned crisisLevelOrder slice rather
+// than a map, so parsing is deterministic.
 func ParseCrisisLevel(s string) CrisisLevel {
-	for level, name := range crisisNames {
-		if name == strings.ToLower(s) {
-			return level
+	lowered := strings.ToLower(s)
+	for _, entry := range crisisLevelOrder {
+		if entry.name == lowered {
+			return entry.level
 		}
 	}
 	return CrisisGreen

@@ -112,6 +112,12 @@ func NewNeuroLiftFoundation(config FoundationConfig) (*NeuroLiftFoundation, erro
 	default:
 		return nil, fmt.Errorf("unsupported TOI value type %T", config.Toi)
 	}
+	// Strict validation at construction: a foundation must never run with an
+	// invalid TOI document (Bugbot HIGH — presence-only checks previously let
+	// {"version":1,"respect_autonomy":"yes","no_harm":null} through).
+	if res := ValidateTOI(f.toi); !res.Valid {
+		return nil, fmt.Errorf("invalid TOI document: %s", res.Errors[0].Message)
+	}
 	return f, nil
 }
 
@@ -144,10 +150,13 @@ func (f *NeuroLiftFoundation) ValidateTOIDocument() TOIValidationResult {
 	return ValidateTOI(f.toi)
 }
 
-// HealthCheck returns per-component statuses.
+// HealthCheck returns per-component statuses. A component is healthy when it
+// is active and initialized; the TOI/OTOI component additionally requires the
+// foundation's resolved TOI document to pass validation.
 func (f *NeuroLiftFoundation) HealthCheck() HealthCheckResult {
 	components := map[string]ComponentStatus{}
 	healthy := true
+	toiValid := f.ValidateTOIDocument().Valid
 	for _, name := range activeComponentNames {
 		active := f.IsComponentActive(name)
 		status := ComponentStatus{Active: active, Mode: modeName(f.mode)}
@@ -155,19 +164,32 @@ func (f *NeuroLiftFoundation) HealthCheck() HealthCheckResult {
 			status.Error = "not initialized"
 			healthy = false
 		}
+		if active && name == "toi_otoi_framework" && !toiValid {
+			status.Error = "TOI document invalid"
+			healthy = false
+		}
 		components[name] = status
 	}
 	return HealthCheckResult{Healthy: healthy, Components: components, Timestamp: time.Now()}
 }
 
-// ProcessInteraction routes an interaction through the active components and
-// returns the unified response. Interactions with unknown or missing channel
-// provenance are rejected: they are never analyzed as if they were trusted
-// user input.
+// ProcessInteraction routes an interaction through the components its
+// interaction type and the active component set select, mirroring the
+// canonical foundation routing:
+//   - emotional_assessment → Sleepwalker analysis, with an automatic RRT
+//     handoff when the assessed state warrants it (RequiresRrtaHandoff)
+//   - preference_update    → TOI validation of the interaction payload; an
+//     invalid TOI fails the interaction (mirrors canonical update_preferences
+//     raising on invalid preferences)
+//   - crisis_alert, emergency_escalation → RRT assessment
+//
+// All analysis routes sanitize input first (flag, don't block). Interactions
+// with unknown or missing channel provenance are rejected: they are never
+// analyzed as if they were trusted user input.
 func (f *NeuroLiftFoundation) ProcessInteraction(interaction UserInteraction) (FoundationResponse, error) {
 	response := FoundationResponse{
 		Timestamp:          time.Now(),
-		ResponseType:       "foundation_response",
+		ResponseType:       string(interaction.InteractionType),
 		Content:            map[string]any{},
 		ComponentsInvolved: []string{},
 		Trusted:            true,
@@ -183,22 +205,41 @@ func (f *NeuroLiftFoundation) ProcessInteraction(interaction UserInteraction) (F
 		response.Content["error"] = "unknown channel provenance"
 		return response, fmt.Errorf("unknown channel provenance: %q", interaction.Channel)
 	}
+	text := textFromData(interaction.Data)
 
-	if f.IsComponentActive("toi_otoi_framework") {
+	if f.IsComponentActive("toi_otoi_framework") && interaction.InteractionType == InteractionPreferenceUpdate {
 		response.ComponentsInvolved = append(response.ComponentsInvolved, "toi_otoi_framework")
-		result := ValidateTOI(f.toi)
+		payload, _ := interaction.Data["toi"].(map[string]any)
+		result := ValidateTOI(payload)
 		response.Content["toi_otoi"] = map[string]any{"valid": result.Valid, "errors": len(result.Errors)}
+		if !result.Valid {
+			response.Success = false
+			response.Content["error"] = "TOI validation failed"
+		}
 	}
-	if f.IsComponentActive("sleepwalker_protocol") {
+	if f.IsComponentActive("sleepwalker_protocol") && interaction.InteractionType == InteractionEmotionalAssessment {
 		response.ComponentsInvolved = append(response.ComponentsInvolved, "sleepwalker_protocol")
-		state := AnalyzeEmotionalStateWithProvenance(textFromData(interaction.Data), channel)
+		state := AssessEmotionalStateWithProvenance(text, channel)
 		response.Trusted = response.Trusted && state.Trusted
 		response.Content["sleepwalker"] = map[string]any{
 			"state": state.State, "confidence": state.Confidence,
-			"channel": string(channel), "trusted": state.Trusted,
+			"channel": string(channel), "trusted": state.Trusted, "flagged": state.Flagged,
+		}
+		if f.IsComponentActive("rrt_advocate") && RequiresRrtaHandoff(state.EmotionalState) {
+			// Canonical handoff: Sleepwalker escalates to RRT when the
+			// emotional state warrants it; rrt_advocate is listed whenever
+			// the handoff was attempted.
+			assessment := AssessCrisisWithProvenance(interaction.Data, channel)
+			response.ComponentsInvolved = append(response.ComponentsInvolved, "rrt_advocate")
+			response.Trusted = response.Trusted && assessment.Trusted
+			response.Content["rrt"] = map[string]any{
+				"crisis_level": assessment.CrisisLevel.String(), "confidence": assessment.ConfidenceScore,
+				"channel": string(channel), "trusted": assessment.Trusted,
+			}
 		}
 	}
-	if f.IsComponentActive("rrt_advocate") {
+	if f.IsComponentActive("rrt_advocate") &&
+		(interaction.InteractionType == InteractionCrisisAlert || interaction.InteractionType == InteractionEmergencyEscalation) {
 		response.ComponentsInvolved = append(response.ComponentsInvolved, "rrt_advocate")
 		assessment := AssessCrisisWithProvenance(interaction.Data, channel)
 		response.Trusted = response.Trusted && assessment.Trusted
@@ -210,7 +251,8 @@ func (f *NeuroLiftFoundation) ProcessInteraction(interaction UserInteraction) (F
 
 	if len(response.ComponentsInvolved) == 0 {
 		response.Success = false
-		response.Content["error"] = "no components active for mode " + modeName(f.mode)
+		response.Content["error"] = "no components routed for interaction type " + string(interaction.InteractionType) +
+			" under mode " + modeName(f.mode)
 	}
 	return response, nil
 }

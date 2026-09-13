@@ -62,18 +62,31 @@ func defaultCharter() map[string]any {
 }
 
 // ValidateTOI validates a TOI document and returns a normalized deep copy on
-// success. A nil document validates against the default TOI.
+// success. A nil document validates against the default TOI. Validation is
+// strict: field types and values are checked, not just key presence — a
+// document like {"version":1,"respect_autonomy":"yes","no_harm":null} fails.
 func ValidateTOI(toi map[string]any) TOIValidationResult {
 	resolved := sanitizeTOIDocument(toi)
 	var errs []ValidationIssue
 	if v, ok := resolved["version"]; !ok || v == nil {
 		errs = append(errs, ValidationIssue{Message: "missing required field 'version'", Path: "version", Code: "missing_field"})
+	} else if s, isStr := v.(string); !isStr {
+		errs = append(errs, ValidationIssue{Message: fmt.Sprintf("field 'version' must be a string, got %T", v), Path: "version", Code: "invalid_type"})
+	} else if s != "1.0" {
+		errs = append(errs, ValidationIssue{Message: fmt.Sprintf("unsupported TOI version %q, want \"1.0\"", s), Path: "version", Code: "invalid_value"})
 	}
-	if _, ok := resolved["respect_autonomy"]; !ok {
-		errs = append(errs, ValidationIssue{Message: "missing required field 'respect_autonomy'", Path: "respect_autonomy", Code: "missing_field"})
-	}
-	if _, ok := resolved["no_harm"]; !ok {
-		errs = append(errs, ValidationIssue{Message: "missing required field 'no_harm'", Path: "no_harm", Code: "missing_field"})
+	for _, field := range []string{"respect_autonomy", "no_harm"} {
+		v, ok := resolved[field]
+		if !ok || v == nil {
+			errs = append(errs, ValidationIssue{Message: "missing required field '" + field + "'", Path: field, Code: "missing_field"})
+			continue
+		}
+		b, isBool := v.(bool)
+		if !isBool {
+			errs = append(errs, ValidationIssue{Message: fmt.Sprintf("field '%s' must be a boolean, got %T", field, v), Path: field, Code: "invalid_type"})
+		} else if !b {
+			errs = append(errs, ValidationIssue{Message: "field '" + field + "' must be true", Path: field, Code: "invalid_value"})
+		}
 	}
 	if len(errs) > 0 {
 		return TOIValidationResult{Valid: false, Errors: errs}
@@ -82,17 +95,32 @@ func ValidateTOI(toi map[string]any) TOIValidationResult {
 }
 
 // ValidateCharter validates an OTOI charter document. A nil charter validates
-// against the default charter.
+// against the default charter. Like ValidateTOI, validation is strict: types
+// and values are checked, not just key presence.
 func ValidateCharter(charter map[string]any) OTOIValidationResult {
 	if charter == nil {
 		charter = defaultCharter()
 	}
 	var errs []ValidationIssue
-	if _, ok := charter["version"]; !ok {
+	if v, ok := charter["version"]; !ok || v == nil {
 		errs = append(errs, ValidationIssue{Message: "missing required field 'version'", Path: "version", Code: "missing_field"})
+	} else if s, isStr := v.(string); !isStr {
+		errs = append(errs, ValidationIssue{Message: fmt.Sprintf("field 'version' must be a string, got %T", v), Path: "version", Code: "invalid_type"})
+	} else if s != "1.0" {
+		errs = append(errs, ValidationIssue{Message: fmt.Sprintf("unsupported charter version %q, want \"1.0\"", s), Path: "version", Code: "invalid_value"})
 	}
-	if _, ok := charter["transparency"]; !ok {
-		errs = append(errs, ValidationIssue{Message: "missing required field 'transparency'", Path: "transparency", Code: "missing_field"})
+	for _, field := range []string{"transparency", "accountability", "fairness", "non_maleficence"} {
+		v, ok := charter[field]
+		if !ok || v == nil {
+			errs = append(errs, ValidationIssue{Message: "missing required field '" + field + "'", Path: field, Code: "missing_field"})
+			continue
+		}
+		b, isBool := v.(bool)
+		if !isBool {
+			errs = append(errs, ValidationIssue{Message: fmt.Sprintf("field '%s' must be a boolean, got %T", field, v), Path: field, Code: "invalid_type"})
+		} else if !b {
+			errs = append(errs, ValidationIssue{Message: "field '" + field + "' must be true", Path: field, Code: "invalid_value"})
+		}
 	}
 	if len(errs) > 0 {
 		return OTOIValidationResult{Valid: false, Errors: errs}
@@ -212,3 +240,7 @@ func StoreSecurityEvent(path string, event SecurityEvent) error {
 func dirOf(path string) string {
 	return filepath.Dir(path)
 }
+
+// defaultSecurityLogPath is where sanitizeForAssessment stores security
+// events. Tests override it to keep writes out of the repository.
+var defaultSecurityLogPath = "asfdk-security.jsonl"

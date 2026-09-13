@@ -112,12 +112,19 @@ func AssessCrisis(data map[string]any) CrisisAssessment {
 	}
 }
 
-// AssessCrisisWithProvenance adds channel-aware trust analysis.
+// AssessCrisisWithProvenance adds channel-aware trust analysis following the
+// canonical flow: sanitize first (flag, don't block), assess the sanitized
+// content, attach provenance. Trust is true only for direct user input.
 func AssessCrisisWithProvenance(data map[string]any, channel Channel) CrisisAssessmentWithProvenance {
-	assessment := AssessCrisis(data)
+	sanitized := sanitizeForAssessment(textFromData(data))
+	assessment := AssessCrisis(map[string]any{"text": sanitized.Content})
 	trusted := channelTrusted(channel)
 	res := CrisisAssessmentWithProvenance{CrisisAssessment: assessment, Channel: channel, Trusted: trusted}
-	if !trusted {
+	if !sanitized.Clean {
+		res.Flagged = true
+		res.FlagReason = sanitized.Reason
+	}
+	if !trusted && !res.Flagged {
 		res.Flagged = true
 		res.FlagReason = "untrusted channel: " + string(channel)
 	}
