@@ -1,0 +1,52 @@
+{
+  "handoff_record": {
+    "session_id": "session-asfdk-go-002",
+    "agent_name": "go_governance_agent (Cline)",
+    "date": "2026-09-12",
+    "repo": "NeuroLift-Technologies/asfdk-go",
+    "branch": "feature/port-asfdk-go",
+    "work_completed": [
+      "Addressed all PR #1 review findings (Codex inline P1/P2/P2, JDUB1216 code review, NLT ORG-DEV-OTOI review)",
+      "P1 unknown-channel provenance: ProcessInteraction no longer relabels unknown/missing channels as user_input; it fails closed (error + Success=false + Trusted=false). ChannelNormalize now canonicalizes Channel values through ParseChannel so non-canonical Channel constants resolve to ChannelUnknown",
+      "P2 TOI file loading: NewNeuroLiftFoundation now returns (foundation, error); missing/unreadable/malformed TOI files and unsupported Toi value types surface errors instead of silently falling back to the default TOI",
+      "P2 path handling: dirOf delegates to filepath.Dir (platform-aware); kept as a deprecated shim for compatibility",
+      "Review Low findings: removed no-value jsonUnmarshal/jsonMarshal indirection wrappers; unified component ordering via activeComponentNames (HealthCheck now alphabetical, no sort call in StatusSummary); textFromData treats missing/nil text as empty instead of feeding '<nil>' to analyzers; crisisPatternNames helper keeps RRT scoring deterministic",
+      "Added aggregate FoundationResponse.Trusted (false when any involved component flags untrusted provenance)",
+      "Tests grown 18 -> 22: TOI file failure surfacing, unknown-channel rejection (incl. non-canonical Channel value), untrusted-channel aggregation, textFromData edge cases; existing tests migrated to mustFoundation helper",
+      "README updated: fail-closed provenance note, new constructor signature in quick-start, 22-test count"
+    ],
+    "work_in_progress": [
+      "PR re-review (all findings addressed in review-fix commit)"
+    ],
+    "blockers": [],
+    "decisions_made": [
+      "Unknown/missing channel provenance fails closed and REJECTS the interaction (security-first; cannot silently grant user_input trust) — deliberate behavior change from the initial port",
+      "Configured TOI file failures are hard errors; only an unset Toi (nil) selects the default document",
+      "dirOf kept as deprecated shim rather than deleted, to avoid breaking any early adopters"
+    ],
+    "decisions_pending": [
+      "Wire go test into CI alongside governance validation (post-merge follow-up)",
+      "Full TOI schema depth and OTOI mesh advanced policies (post-merge phase)"
+    ],
+    "escalations": [],
+    "next_agent_notes": "All PR #1 findings addressed. Gates: gofmt clean, go vet clean, go build OK, 22/22 tests, governance 22/22. Public API change: NewNeuroLiftFoundation returns (*NeuroLiftFoundation, error). README quick-start matches.",
+    "files_modified": [
+      "foundation.go (constructor error return, channel fail-closed, Trusted aggregation, component-order unification)",
+      "types.go (ChannelNormalize canonicalizes Channel values)",
+      "promptdefense.go (filepath.Dir, wrapper removal)",
+      "sleepwalker.go (textFromData helper, fmt import)",
+      "rrt.go (textFromData use, crisisPatternNames, fmt import removed)",
+      "dto.go (FoundationResponse.Trusted + docstrings)",
+      "foundation_test.go (22 tests incl. 4 new)",
+      "README.md (fail-closed note, constructor signature, test count)"
+    ],
+    "tests_run": [
+      "go test ./... -count=1 (22 tests)",
+      "go vet ./...",
+      "gofmt -l .",
+      "go build ./...",
+      "bash .nltotoi/scripts/validate-governance.sh"
+    ],
+    "tests_passing": true
+  }
+}

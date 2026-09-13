@@ -1,0 +1,52 @@
+{
+  "handoff_record": {
+    "session_id": "session-asfdk-go-001",
+    "agent_name": "go_governance_agent (Cline)",
+    "date": "2026-09-12",
+    "repo": "NeuroLift-Technologies/asfdk-go",
+    "branch": "feature/port-asfdk-go",
+    "work_completed": [
+      "Clean-room Go port of ASFDK core (module github.com/NeuroLift-Technologies/asfdk-go, Go 1.25, standard library only)",
+      "types.go: FoundationMode, InteractionType, Channel, RiskLevel, SecurityEventType, OutputSchemaType enums with canonical JSON names; ordered CrisisLevel with String/MarshalJSON/ParseCrisisLevel",
+      "dto.go: FoundationConfig/FoundationComponents, UserInteraction, FoundationResponse, health/validation/assessment DTOs with provenance wrappers",
+      "promptdefense.go: ValidateTOI, ValidateCharter, SanitizeInput (control-char stripping, URL-decode detection, structural tokens, injection patterns), ValidateOutput, security event audit log",
+      "foundation.go: NeuroLiftFoundation with mode default component sets and explicit FoundationComponents override semantics (override always wins — parity with asfdk-csharp fix), ProcessInteraction unified pipeline",
+      "sleepwalker.go: 8-indicator emotional lexicon, AnalyzeEmotionalState + channel-trust provenance",
+      "rrt.go: additive-weight crisis scoring, CrisisGreen..CrisisBlack thresholds, recommended interventions, safe response scripts, provenance",
+      "Removed misplaced C++ port content (packages/, CMakeLists.txt, vcpkg.json, C++ docs) — preserved on branch archive/cpp-initial-import and in NeuroLift-Technologies/asfdk-cplus",
+      "Rewrote governance identity files for Go (nltotoi.json, .nltotoi/*, AGENTS.md, CLAUDE.md, CI workflow name)"
+    ],
+    "work_in_progress": [
+      "PR creation on GitHub (branch feature/port-asfdk-go)"
+    ],
+    "blockers": [],
+    "decisions_made": [
+      "Initial C++ content archived to archive/cpp-initial-import branch instead of deletion — nothing lost, no force-push",
+      "Crisis thresholds recalibrated for additive weights (green 0.1 / yellow 0.2 / orange 0.3 / red 0.4) so a single explicit self-harm ideation match (weight 0.4) reaches CrisisBlack — safety-first under-escalation fix vs naive threshold mapping",
+      "Standard library only — no third-party dependencies",
+      "Override semantics ported correctly from day one (C# port lesson)"
+    ],
+    "decisions_pending": [
+      "Whether to add OTOI mesh advanced policies and TOI full schema depth in a follow-up phase",
+      "CI workflow to run go test alongside governance validation"
+    ],
+    "escalations": [],
+    "next_agent_notes": "Branch ready for PR. Run: gofmt -l . (clean), go vet ./... (clean), go test ./... (18/18), bash .nltotoi/scripts/validate-governance.sh (22/22). PR body must use PULL_REQUEST_TEMPLATE/agent-contribution.md verbatim; document removal of C++ content and docs/ changes in PR scope.",
+    "files_modified": [
+      "go.mod (new)", "types.go (new)", "dto.go (new)", "foundation.go (new)",
+      "promptdefense.go (new)", "sleepwalker.go (new)", "rrt.go (new)",
+      "foundation_test.go (new)", "README.md (rewritten for Go)",
+      "packages/ (removed)", "CMakeLists.txt (removed)", "vcpkg.json (removed)",
+      "asfdk-architecture.png (removed)", "docs/PLAN.md, docs/DECISIONS.md, docs/HANDOFF-*.md, docs/ASFDK-C++-HANDOFF.md, docs/phase-1-reference-analysis.md, docs/ref_PORT_MATRIX_TOI.md, docs/reviews/ (removed)",
+      "docs/active-threads.md (rewritten for Go port)", "docs/agent-log/ (fresh Go records)",
+      "AGENTS.md, CLAUDE.md, nltotoi.json, .nltotoi/*, .github/workflows/validate-governance.yml, .gitignore (updated)"
+    ],
+    "tests_run": [
+      "go test ./... (18 tests)",
+      "go vet ./...",
+      "gofmt -l .",
+      "bash .nltotoi/scripts/validate-governance.sh"
+    ],
+    "tests_passing": true
+  }
+}

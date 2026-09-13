@@ -1,0 +1,38 @@
+{
+  "handoff_record": {
+    "session_id": "session-asfdk-go-003",
+    "agent_name": "go_governance_agent (Cline)",
+    "date": "2026-09-12",
+    "repo": "NeuroLift-Technologies/asfdk-go",
+    "branch": "feature/port-asfdk-go",
+    "work_completed": [
+      "Addressed second PR #1 review round (Bugbot HIGH x2, MEDIUM x4 + canonical-parity gaps), each verified against NeuroLift-Technologies/asfdk source before fixing",
+      "HIGH: TOI/charter validation now type- and value-strict (invalid_type/invalid_value/invalid_version codes); enforced at foundation construction",
+      "HIGH: sanitize-first flag-not-block — Sleepwalker/RRT assess sanitized content and flag provenance instead of blocking; injection_attempt security events logged to overridable audit path (ASFDK_SECURITY_LOG)",
+      "MEDIUM: only user_input is trusted (canonical); response_type mirrors interaction_type; canonical RequiresRrtaHandoff routes emotional assessments to RRT with both components listed; preference updates route TOI validation and fail on invalid payloads; unrouted interaction types fail explicitly; health check fails on invalid resolved TOI",
+      "CI workflow now runs go build/go vet/go test alongside governance validation",
+      "Tests 22 -> 29; all gates green"
+    ],
+    "work_in_progress": ["Awaiting re-review on commit 85e4e16"],
+    "blockers": [],
+    "decisions_made": [
+      "Channel trust corrected to canonical (only user_input) — supersedes the earlier Codex-suggested trust of system channels",
+      "Blocking replaced with flag-and-assess to match canonical never-block behavior; security events still audited",
+      "Foundation construction now hard-fails on invalid resolved TOI documents"
+    ],
+    "decisions_pending": ["Full TOI schema depth and OTOI mesh advanced policies (post-merge phase)"],
+    "escalations": [],
+    "next_agent_notes": "Commit 85e4e16 addresses the full Bugbot round with canonical parity. Gates: gofmt clean, vet clean, build OK, 29/29 tests, governance 22/22. Resolution comment posted on PR #1.",
+    "files_modified": [
+      "promptdefense.go (strict TOI/charter validation, sanitize-first plumbing, overridable audit path)",
+      "types.go (ChannelTrust canonical; new provenance reason fields)",
+      "sleepwalker.go (AssessEmotionalStateWithProvenance sanitize-first, canonical RequiresRrtaHandoff)",
+      "rrt.go (AssessCrisisWithProvenance sanitize-first, confidence normalization)",
+      "foundation.go (construction-time TOI validation, response_type mirroring, handoff + preference routing, no-route failure, TOI health check)",
+      ".github/workflows/validate-governance.yml (go build/vet/test job)",
+      "foundation_test.go (29 tests)"
+    ],
+    "tests_run": ["go test ./... -count=1 (29 tests)", "go vet ./...", "gofmt -l .", "go build ./...", "bash .nltotoi/scripts/validate-governance.sh"],
+    "tests_passing": true
+  }
+}
